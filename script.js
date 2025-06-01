@@ -11,18 +11,27 @@ class Pigeon {
   }
 
   evaluate() {
-    // Sphere function: tối ưu về điểm (0,0)
-    return this.x * this.x + this.y * this.y;
+    return this.x ** 2 + this.y ** 2; // Sphere function
   }
 
-  updateVelocityTowardBest(bestX, bestY) {
-    this.velocityX += Math.random() * 0.1 * (bestX - this.x);
-    this.velocityY += Math.random() * 0.1 * (bestY - this.y);
+  updateVelocityToBest(best, alpha) {
+    this.velocityX += alpha * Math.random() * (best.x - this.x);
+    this.velocityY += alpha * Math.random() * (best.y - this.y);
+
+    // Giới hạn vận tốc
+    const maxV = 5;
+    this.velocityX = Math.max(-maxV, Math.min(maxV, this.velocityX));
+    this.velocityY = Math.max(-maxV, Math.min(maxV, this.velocityY));
   }
 
   move() {
     this.x += this.velocityX;
     this.y += this.velocityY;
+
+    // Giới hạn không gian tìm kiếm
+    this.x = Math.max(-400, Math.min(400, this.x));
+    this.y = Math.max(-300, Math.min(300, this.y));
+
     this.cost = this.evaluate();
   }
 }
@@ -38,7 +47,9 @@ function startPIO() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   for (let i = 0; i < numPigeons; i++) {
-    pigeons.push(new Pigeon(Math.random() * 800 - 400, Math.random() * 600 - 300));
+    let x = Math.random() * 800 - 400;
+    let y = Math.random() * 600 - 300;
+    pigeons.push(new Pigeon(x, y));
   }
 
   bestPigeon = getBestPigeon();
@@ -52,22 +63,33 @@ function getBestPigeon() {
 function runPIO() {
   if (iter >= maxIter) return;
 
-  // Giai đoạn 1: Map & Compass
-  if (iter < maxIter * 0.5) {
+  const alpha = 0.05; // Hệ số ảnh hưởng Map & Compass
+  const beta = 0.1;   // Hệ số hội tụ Landmark
+
+  if (iter < maxIter / 2) {
+    // Giai đoạn 1: Map & Compass
     pigeons.forEach(p => {
-      p.updateVelocityTowardBest(bestPigeon.x, bestPigeon.y);
+      p.updateVelocityToBest(bestPigeon, alpha);
       p.move();
     });
   } else {
-    // Giai đoạn 2: Landmark Operator
-    const centerX = pigeons.reduce((sum, p) => sum + p.x, 0) / pigeons.length;
-    const centerY = pigeons.reduce((sum, p) => sum + p.y, 0) / pigeons.length;
+    // Giai đoạn 2: Landmark
+    // Bước 1: chọn elite pigeons (top 50%)
+    pigeons.sort((a, b) => a.cost - b.cost);
+    let elite = pigeons.slice(0, Math.floor(pigeons.length / 2));
 
-    pigeons.forEach(p => {
-      p.velocityX = (centerX - p.x) * 0.05;
-      p.velocityY = (centerY - p.y) * 0.05;
+    // Bước 2: tính trung tâm
+    let centerX = elite.reduce((sum, p) => sum + p.x, 0) / elite.length;
+    let centerY = elite.reduce((sum, p) => sum + p.y, 0) / elite.length;
+
+    // Bước 3: hội tụ về landmark
+    elite.forEach(p => {
+      p.velocityX = beta * (centerX - p.x);
+      p.velocityY = beta * (centerY - p.y);
       p.move();
     });
+
+    pigeons = elite; // loại bỏ non-elite
   }
 
   bestPigeon = getBestPigeon();
@@ -78,10 +100,15 @@ function runPIO() {
 
 function drawPigeons() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  pigeons.forEach((p, i) => {
+  pigeons.forEach(p => {
     ctx.fillStyle = (p === bestPigeon) ? '#ff0000' : '#0077ff';
     ctx.beginPath();
     ctx.arc(p.x + 400, p.y + 300, (p === bestPigeon) ? 10 : 6, 0, Math.PI * 2);
     ctx.fill();
   });
+
+  // Hiển thị cost tốt nhất
+  ctx.fillStyle = '#000';
+  ctx.font = '16px Arial';
+  ctx.fillText(`Best Cost: ${bestPigeon.cost.toFixed(2)}`, 10, 20);
 }
