@@ -1,128 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pigeon Inspired Optimization - PIO Advanced</title>
-    <!-- Tailwind CSS CDN for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Custom CSS file -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công cụ Trực quan hóa Tối ưu hóa Lấy Cảm Hứng Từ Chim Bồ Câu (PIO)</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
-    <!-- Main container for the application -->
-    <div class="flex flex-col lg:flex-row items-center justify-center p-4 gap-8 w-full max-w-6xl">
+<body>
+    <div class="container">
+        <h1>Công cụ Trực quan hóa Tối ưu hóa Lấy Cảm Hứng Từ Chim Bồ Câu (PIO)</h1>
 
-        <!-- Controls Panel -->
-        <div id="controls" class="bg-white p-8 rounded-xl shadow-2xl flex flex-col gap-6 w-full lg:w-1/3 max-w-md border border-gray-200">
-            <h2 class="text-3xl font-bold text-gray-800 mb-4 text-center">PIO Parameters</h2>
-
-            <div class="flex flex-col gap-2">
-                <label for="objectiveFunction" class="text-lg font-medium text-gray-700">Objective Function:</label>
-                <select id="objectiveFunction" class="p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-gray-900 shadow-sm">
-                    <option value="sphere">Sphere Function</option>
-                    <option value="rastrigin">Rastrigin Function</option>
-                    <option value="rosenbrock">Rosenbrock Function</option>
+        <div class="controls">
+            <div class="param-group">
+                <label for="populationSize">Kích thước quần thể:</label>
+                <input type="number" id="populationSize" value="30" min="10" max="200">
+            </div>
+            <div class="param-group">
+                <label for="maxIterations">Số vòng lặp tối đa:</label>
+                <input type="number" id="maxIterations" value="1000" min="100" max="5000">
+            </div>
+            <div class="param-group">
+                <label for="dimensions">Số chiều (n):</label>
+                <input type="number" id="dimensions" value="2" min="2" max="30">
+                <small>(Để hiển thị trực quan, nên dùng 2D)</small>
+            </div>
+            <div class="param-group">
+                <label for="searchRangeMin">Phạm vi tìm kiếm (min):</label>
+                <input type="number" id="searchRangeMin" value="-100">
+            </div>
+            <div class="param-group">
+                <label for="searchRangeMax">Phạm vi tìm kiếm (max):</label>
+                <input type="number" id="searchRangeMax" value="100">
+            </div>
+            <div class="param-group">
+                <label for="functionSelect">Chọn hàm thử nghiệm:</label>
+                <select id="functionSelect">
+                    <option value="sphere">Hàm Sphere</option>
+                    <option value="rosenbrock">Hàm Rosenbrock</option>
+                    <option value="rastrigin">Hàm Rastrigin</option>
+                    <option value="ackley">Hàm Ackley</option>
                 </select>
             </div>
-
-            <div class="flex flex-col gap-2">
-                <label for="numPigeons" class="text-lg font-medium text-gray-700">Number of Pigeons:</label>
-                <input
-                    type="number"
-                    id="numPigeons"
-                    value="30"
-                    min="10"
-                    max="200"
-                    class="p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-gray-900 shadow-sm"
-                />
-            </div>
-
-            <div class="flex flex-col gap-2">
-                <label for="iterations" class="text-lg font-medium text-gray-700">Iterations:</label>
-                <input
-                    type="number"
-                    id="iterations"
-                    value="200"
-                    min="50"
-                    max="1000"
-                    class="p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-gray-900 shadow-sm"
-                />
-            </div>
-
-            <div class="flex flex-col gap-2">
-                <label for="inertiaWeightStart" class="text-lg font-medium text-gray-700">Inertia Weight (Start):</label>
-                <input
-                    type="number"
-                    id="inertiaWeightStart"
-                    value="0.9"
-                    step="0.05"
-                    min="0.1"
-                    max="1.0"
-                    class="p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-gray-900 shadow-sm"
-                />
-            </div>
-
-            <div class="flex flex-col gap-2">
-                <label for="inertiaWeightEnd" class="text-lg font-medium text-gray-700">Inertia Weight (End):</label>
-                <input
-                    type="number"
-                    id="inertiaWeightEnd"
-                    value="0.1"
-                    step="0.05"
-                    min="0.0"
-                    max="0.9"
-                    class="p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-gray-900 shadow-sm"
-                />
-            </div>
-
-            <div class="flex flex-col gap-2">
-                <label for="landmarkFactor" class="text-lg font-medium text-gray-700">Landmark Factor:</label>
-                <input
-                    type="number"
-                    id="landmarkFactor"
-                    value="0.2"
-                    step="0.05"
-                    min="0.05"
-                    max="1.0"
-                    class="p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-gray-900 shadow-sm"
-                />
-            </div>
-
-            <button
-                onclick="startPIO()"
-                class="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-all duration-300 ease-in-out shadow-md hover:shadow-lg transform hover:scale-105 text-xl font-semibold mt-4"
-            >
-                Start PIO Simulation
-            </button>
-
-            <!-- Message display area -->
-            <div id="messageBox" class="mt-4 p-3 bg-blue-100 text-blue-800 rounded-lg hidden" role="alert">
-                <!-- Messages will be displayed here -->
+            <div class="param-group">
+                <button id="startButton">Bắt đầu mô phỏng</button>
+                <button id="resetButton">Đặt lại</button>
             </div>
         </div>
 
-        <!-- Visualization Area -->
-        <div class="flex flex-col gap-8 w-full lg:w-2/3 max-w-2xl">
-            <!-- PIO Simulation Canvas -->
-            <div class="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden flex items-center justify-center p-4">
-                <canvas id="pioCanvas" width="800" height="600" class="block"></canvas>
-            </div>
+        <div class="info-panel">
+            <p>Vòng lặp: <span id="currentIteration">0</span></p>
+            <p>Chi phí tốt nhất: <span id="bestCost">N/A</span></p>
+            <p>Vị trí tốt nhất: <span id="bestPosition">N/A</span></p>
+        </div>
 
-            <!-- Current Phase Indicator -->
-            <div id="phaseIndicator" class="bg-white p-4 rounded-xl shadow-md border border-gray-200 text-center text-xl font-semibold text-gray-700">
-                Current Phase: <span id="currentPhase" class="text-blue-600">N/A</span>
+        <div class="visualization-area">
+            <div class="canvas-container">
+                <h2>Không gian tìm kiếm</h2>
+                <canvas id="optimizationCanvas"></canvas>
             </div>
-
-            <!-- Convergence Plot Canvas -->
-            <div class="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden flex items-center justify-center p-4">
-                <h3 class="text-xl font-bold text-gray-800 mb-2 text-center w-full">Convergence Plot (Best Cost)</h3>
-                <canvas id="convergencePlotCanvas" width="800" height="300" class="block"></canvas>
+            <div class="canvas-container">
+                <h2>Biểu đồ hội tụ (Chi phí tốt nhất theo vòng lặp)</h2>
+                <canvas id="convergencePlotCanvas"></canvas>
             </div>
         </div>
     </div>
-
-    <!-- Main JavaScript file -->
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
-</html>
+<html>
